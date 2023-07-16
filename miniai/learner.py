@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['torch_device', 'device', 'Learner', 'Callback', 'run_cbs', 'CancelFitException', 'CancelBatchException',
            'CancelEpochException', 'to_cpu', 'M', 'Recorder', 'MetricsCB', 'DeviceCB', 'with_cbs', 'ProgressCB',
-           'TensorboardCB', 'Config', 'WandBCB', 'MomentumLearner', 'LRFinderCB', 'lr_find', 'SingleBatchCB']
+           'TensorboardCB', 'BaseConfig', 'WandBCB', 'MomentumLearner', 'LRFinderCB', 'lr_find', 'SingleBatchCB']
 
 # %% ../nbs/09_learner.ipynb 1
 import math
@@ -250,21 +250,11 @@ class TensorboardCB(Callback):
 import wandb
 from pathlib import Path
 
-
-class Config(dict):
-    def __init__(self, ds, arch, **kwargs):
-        opts = { 'epochs': 5, 'lr': 1e-4, 'model_path': 'models' }
-        opts.update(kwargs)
-        super().__init__(ds=ds, arch=arch, **opts)
-
-    def __getattr__(self, key):
-        if key in self:
-            return self[key]
-        return super().__getattr__(self, key)
+class BaseConfig: pass # We define full configs in 11_initializing
 
 class WandBCB(Callback):
     order = MetricsCB.order + 1
-    def __init__(self, config: Config): 
+    def __init__(self, config: BaseConfig): 
         self.config = config
         
     def before_fit(self, learn: Learner): wandb.init(project=self.config.project, config=self.config)        
